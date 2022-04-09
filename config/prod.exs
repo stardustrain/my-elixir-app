@@ -47,3 +47,6 @@ config :logger, level: :info
 #       force_ssl: [hsts: true]
 #
 # Check `Plug.SSL` for all available options in `force_ssl`.
+config :my_app, MyApp.Guardian,
+  issuer: "my_app",
+  secret_key: System.get_env("SECRET_KEY")
