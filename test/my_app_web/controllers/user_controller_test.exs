@@ -104,6 +104,50 @@ defmodule MyAppWeb.UserControllerTest do
     end
   end
 
+  describe "user authorization" do
+    setup [:create_user, :create_admin_token]
+
+    test "should render user information if admin", %{conn: conn, admin_token: token} do
+      conn = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      conn = get(
+        conn,
+        Routes.user_path(conn, :admin_only)
+      )
+
+      assert json_response(conn, 200)
+    end
+
+    test "should render 401 error with invalid jwt token", %{conn: conn} do
+      conn = conn |> put_req_header("authorization", "Bearer INVALID_TOKEN")
+
+      conn = get(
+        conn,
+        Routes.user_path(conn, :admin_only)
+      )
+
+      assert json_response(conn, 401)
+    end
+
+    test "should render 403 error if not a admin user token", %{conn: conn, user: user} do
+      {:ok, token, _claims} = Guardian.encode_and_sign(user)
+      conn = conn |> put_req_header("authorization", "Bearer #{token}")
+
+      conn = get(
+        conn,
+        Routes.user_path(conn, :admin_only)
+      )
+
+      assert json_response(conn, 403)["errors"] === %{"detail" => "Forbidden"}
+    end
+  end
+
+  defp create_admin_token(_) do
+    admin = create_user_fixture(%{email: "admin@test.com", is_admin: true})
+    {:ok, token, _claims} = Guardian.encode_and_sign(admin)
+    %{admin_token: token}
+  end
+
   defp create_user(_) do
     user = create_user_fixture(@user_attrs)
     %{user: user}

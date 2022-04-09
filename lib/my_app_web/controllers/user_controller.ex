@@ -27,4 +27,11 @@ defmodule MyAppWeb.UserController do
     conn
     |> render("me.json", user: user)
   end
+
+  def admin_only(conn, _) do
+    user = Guardian.Plug.current_resource(conn)
+
+    conn
+    |> render("me.json", user: user)
+  end
 end

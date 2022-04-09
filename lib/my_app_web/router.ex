@@ -9,6 +9,11 @@ defmodule MyAppWeb.Router do
     plug MyApp.Authentication
   end
 
+  pipeline :ensure_admin do
+    plug MyApp.Authentication
+    plug MyApp.Authorization
+  end
+
   scope "/api", MyAppWeb do
     pipe_through :api
 
@@ -20,6 +25,12 @@ defmodule MyAppWeb.Router do
     pipe_through [:api, :authentication]
 
     get "/me", UserController, :me
+  end
+
+  scope "/admin", MyAppWeb do
+    pipe_through [:api, :ensure_admin]
+
+    get "/admin-only", UserController, :admin_only
   end
 
   # Enables LiveDashboard only for development
