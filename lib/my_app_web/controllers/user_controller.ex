@@ -22,16 +22,9 @@ defmodule MyAppWeb.UserController do
   end
 
   def me(conn, _) do
-    token = conn
-    |> get_req_header("authorization")
-    |> List.first("")
-    |> String.split
-    |> List.last
-    result = Guardian.resource_from_token(token)
+    user = Guardian.Plug.current_resource(conn)
 
-    case result do
-      {:ok, resource, _claims} -> conn |> render("me.json", user: resource)
-      {:error, _reason} -> {:error, :unauthorized}
-    end
+    conn
+    |> render("me.json", user: user)
   end
 end
