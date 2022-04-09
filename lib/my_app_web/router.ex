@@ -10,6 +10,7 @@ defmodule MyAppWeb.Router do
 
     post "/signup", UserController, :signup
     post "/signin", UserController, :signin
+    get "/me", UserController, :me
   end
 
   # Enables LiveDashboard only for development

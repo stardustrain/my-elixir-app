@@ -67,6 +67,43 @@ defmodule MyAppWeb.UserControllerTest do
     end
   end
 
+  describe "retrieve user" do
+    setup [:create_user]
+
+    test "should render user information with valid jwt token", %{conn: conn} do
+      login_response = post(
+        conn,
+        Routes.user_path(conn, :signin),
+        @user_attrs
+      )
+
+      %{"token" => token} = json_response(login_response, 200)
+
+      conn = conn |> put_req_header("authorization", "Bearer #{token}")
+      conn = get(
+        conn,
+        Routes.user_path(conn, :me)
+      )
+
+      assert json_response(conn, 200)
+      keys = json_response(conn, 200) |> Map.keys
+
+      assert keys
+             |> Enum.all?(fn key -> Enum.member?(["id", "email", "inserted_at", "updated_at"], key)  end)
+      refute keys
+             |> Enum.all?(fn key -> Enum.member?(["is_admin", "is_super_user"], key)  end)
+    end
+
+    test "should render 401 with invalid jwt token", %{conn: conn} do
+      conn = get(
+        conn,
+        Routes.user_path(conn, :me)
+      )
+
+      assert json_response(conn, 401)
+    end
+  end
+
   defp create_user(_) do
     user = create_user_fixture(@user_attrs)
     %{user: user}
