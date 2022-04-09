@@ -12,4 +12,11 @@ defmodule MyAppWeb.UserController do
       |> render("jwt.json", token: token)
     end
   end
+
+  def signin(conn, %{"email" => email, "password" => password}) do
+    with {:ok, token, _claims} <- Account.sign_in(email, password) do
+      conn
+      |> render("jwt.json", token: token)
+    end
+  end
 end

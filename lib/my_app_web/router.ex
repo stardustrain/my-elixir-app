@@ -9,6 +9,7 @@ defmodule MyAppWeb.Router do
     pipe_through :api
 
     post "/signup", UserController, :signup
+    post "/signin", UserController, :signin
   end
 
   # Enables LiveDashboard only for development

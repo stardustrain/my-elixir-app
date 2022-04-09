@@ -3,6 +3,7 @@ defmodule MyAppWeb.UserControllerTest do
 
   use MyAppWeb.ConnCase
 
+  alias MyApp.Guardian
   import MyApp.UserFixture
 
   @user_attrs %{email: "test@test.com", password: "test1234"}
@@ -34,6 +35,35 @@ defmodule MyAppWeb.UserControllerTest do
 
       conn = post(conn, Routes.user_path(conn, :signup), @user_attrs)
       assert json_response(conn, 400)["errors"] !== %{}
+    end
+  end
+
+  describe "user sign in" do
+    setup [:create_user]
+
+    test "should render jwt token with valid user", %{conn: conn, user: user} do
+      conn = post(
+        conn,
+        Routes.user_path(conn, :signin),
+        @user_attrs
+      )
+
+      %{"token" => token} = json_response(conn, 200)
+      {:ok, claims} = Guardian.decode_and_verify(token)
+
+      assert claims["sub"] === user.id |> to_string
+    end
+
+    test "should render 401 with invalid attributes", %{conn: conn} do
+      invalid_attrs = %{email: "invalid@test.com", password: "test1234"}
+
+      conn = post(
+        conn,
+        Routes.user_path(conn, :signin),
+        invalid_attrs
+      )
+
+      assert json_response(conn, 401)["errors"]["detail"] === "Unauthorized"
     end
   end
 
