@@ -23,4 +23,18 @@ defmodule MyApp.AccountTest do
 
     assert {:error, %Ecto.Changeset{}} = Account.create_user(%{email: "test@test.com", password: "test1234"})
   end
+
+  test "get_user_by_id!/1 returns User strcut with valid id" do
+    create_user_fixture(%{email: "test@test.com"})
+
+    user = Account.get_user_by_id!(1)
+    assert user.id === 1
+    assert user.email === "test@test.com"
+  end
+
+  test "get_user_by_id!/1 throw error with invalid id" do
+    assert_raise Ecto.NoResultsError, fn ->
+      Account.get_user_by_id!(-1)
+    end
+  end
 end
