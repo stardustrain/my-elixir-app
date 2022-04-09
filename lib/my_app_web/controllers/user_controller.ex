@@ -3,6 +3,8 @@ defmodule MyAppWeb.UserController do
 
   alias MyApp.Account
 
+  action_fallback MyAppWeb.FallbackController
+
   def signup(conn, %{"email" => email, "password" => password}) do
     with {:ok, token, _claims} <- Account.sign_up(%{email: email, password: password}) do
       conn
