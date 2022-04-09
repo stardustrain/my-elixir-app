@@ -3,6 +3,7 @@ defmodule MyApp.AccountTest do
 
   alias MyApp.Account
   alias MyApp.Account.User
+  alias MyApp.Guardian
   import MyApp.UserFixture
 
   test "create_user/1 creates a user with valid data" do
@@ -49,5 +50,23 @@ defmodule MyApp.AccountTest do
     invalid_attrs = %{email: "test@test.com", password: ""}
 
     assert {:error, %Ecto.Changeset{}} = Account.sign_up(invalid_attrs)
+  end
+
+  test "sign_in/2 returns user with valid email and password" do
+    valid_attrs = %{email: "test@test.com", password: "test1234"}
+    user = create_user_fixture(valid_attrs)
+
+    {:ok, token, _} = Account.sign_in(valid_attrs.email, valid_attrs.password)
+    {:ok, claims} = Guardian.decode_and_verify(token)
+
+    assert claims["sub"] === user.id |> to_string
+  end
+
+  test "sign_in/2 returns error with invlid email and password" do
+    valid_attrs = %{email: "test@test.com", password: "test1234"}
+    create_user_fixture(valid_attrs)
+
+    assert {:error, :unauthorized} = Account.sign_in("wrong email", valid_attrs.password)
+    assert {:error, :unauthorized} = Account.sign_in(valid_attrs.email, "wrong password")
   end
 end
