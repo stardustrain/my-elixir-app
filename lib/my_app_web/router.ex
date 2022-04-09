@@ -5,11 +5,20 @@ defmodule MyAppWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :authentication do
+    plug MyApp.Authentication
+  end
+
   scope "/api", MyAppWeb do
     pipe_through :api
 
     post "/signup", UserController, :signup
     post "/signin", UserController, :signin
+  end
+
+  scope "/api", MyAppWeb do
+    pipe_through [:api, :authentication]
+
     get "/me", UserController, :me
   end
 
