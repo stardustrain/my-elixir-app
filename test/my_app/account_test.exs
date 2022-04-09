@@ -37,4 +37,17 @@ defmodule MyApp.AccountTest do
       Account.get_user_by_id!(-1)
     end
   end
+
+  test "sign_up/1 returns JWT token with valid attrs" do
+    valid_attrs = %{email: "test@test.com", password: "test1234"}
+
+    assert {:ok, token, _claims} = Account.sign_up(valid_attrs)
+    assert token !== ""
+  end
+
+  test "sign_up/1 returns error with invalid attrs" do
+    invalid_attrs = %{email: "test@test.com", password: ""}
+
+    assert {:error, %Ecto.Changeset{}} = Account.sign_up(invalid_attrs)
+  end
 end

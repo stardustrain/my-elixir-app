@@ -1,6 +1,7 @@
 defmodule MyApp.Account do
   alias MyApp.Repo
   alias MyApp.Account.User
+  alias MyApp.Guardian
 
   def create_user(attrs \\ %{}) do
     %User{}
@@ -11,5 +12,11 @@ defmodule MyApp.Account do
   def get_user_by_id!(id) do
     User
     |> Repo.get!(id)
+  end
+
+  def sign_up(attrs \\ %{}) do
+    with {:ok, user} <- create_user(attrs) do
+      Guardian.encode_and_sign(user)
+    end
   end
 end
